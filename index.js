@@ -264,4 +264,4 @@ bot.on('guildMemberRemove', member =>{
 /////////////////|| IMAGE Welcome leave - ||/////////////////
 
 
-bot.login(botconfig.TOKEN);
+bot.login(process.env.BOT_TOKEN);
