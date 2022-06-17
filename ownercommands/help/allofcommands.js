@@ -1,112 +1,314 @@
-const { MessageEmbed } = require("discord.js");
-const { readdirSync } = require("fs");
-const prefix = require("../../botconfig.json").prefix;
+const {
+  MessageEmbed,
+  Message,
+  MessageButton, 
+  MessageComponent, 
+  MessageActionRow,
+  bot
+} = require("discord.js");
+const {
+  readdirSync
+} = require("fs");
+const prefix = require("../../botconfig.json").prefix; // this one gets the prefix
+const botname = require("../../botconfig.json").botname;
+let color = "#ff0000"; // this is the color of the embed
 const ownerid = ["653257694689493022"];
 
+const create_mh = require(`../../functions/menu.js`); // this one gets the dropdown menu
+
 module.exports = {
-  name: "ocmd",
-  category: "Fun",
-  description: "Ezzel a parancsal tudod megnézni az összes commandot, és lekérni a parancs informácioit.",
-  
-  run: async (bot, message, args) => {
+  name: "help",
+  emoji: `📌`, // emoji next to the command name i will show you in a min
+  description: "Megmutatja az összes parancsot.",
+  /**
+   * 
+   * @param {bot} bot 
+   * @param {Message} message 
+   * @param {String} args 
+   * @returns 
+   */
+  run: async (bot, message, args, Discord, db) => {
     if (message.author.id == ownerid) {
       if (!message.guild.me.permissions.has("ADMINISTRATOR"))
         return message.channel
           .send("Nincs meg ez a jogom: `ADMINISTRATOR`")
           .then(msg => msg.delete({ timeout: 5000 }));
 
-    const roleColor =
-      message.guild.me.displayHexColor === "#000000"
-        ? "#ffffff"
-        : message.guild.me.displayHexColor;
-
-    if (!args[0]) {
       let categories = [];
+      let cots = [];
 
-      readdirSync("./ownercommands/").forEach((dir) => {
-        const commands = readdirSync(`./ownercommands/${dir}/`,).filter((file) =>
-          file.endsWith(".js")
-        );
+      if (!args[0]) {
 
-        const cmds = commands.map((command) => {
-          let file = require(`../../ownercommands/${dir}/${command}`);
+          //categories to ignore
+          let ignored = [
+              "test"
+          ];
 
-          if (!file.name) return "Nincs parancs név.";
+          const emo = {
 
-          let name = file.name.replace(".js", "");
+              games: "🎮",            
+              miscellaneous: "🎫",
+              image: "📸",
+              owner: "📝",
+              info: "❓",
+              moderator: "⚒️",
+              economy: "💰"
+// emojis for the categories
+          }
 
-          return `\`${name}\``;
-        });
+          let ccate = [];
+          //gets all the folders and commands
+          readdirSync("./ownercommands/").forEach((dir) => {
+              if (ignored.includes(dir.toLowerCase())) return;
+              const commands = readdirSync(`./ownercommands/${dir}/`).filter((file) =>
+                  file.endsWith(".js")
+              );
 
-        let data = new Object();
+              if (ignored.includes(dir.toLowerCase())) return;
 
-        data = {
-          name: dir.toUpperCase(),
-          value: cmds.length === 0 ? "In progress." : cmds.join(" | "),
-        };
+              const name = `${dir}`;
+              //let nome = dir.charAt(0).toUpperCase() + dir.slice(1).toLowerCase();
+              let nome = dir.toUpperCase();
 
-        categories.push(data);
-      });
+              let cats = new Object();
 
-      const embed = new MessageEmbed()
-        .setThumbnail(bot.user.displayAvatarURL())
-        .setTitle("<:SuperBot:889161135117434950> Kell segítség? Itt vannak a parancsaim:")
-        .addFields(categories)
-        .setDescription(
-          `Ha bővebb információt akarsz megtudni egy parancsról akkor használd: \n**${prefix}help <parancs neve>**`
-        )
-        .setImage("https://media.discordapp.net/attachments/889161008998907905/933847437821501440/SuperHUB.png?width=960&height=320")
-        .setFooter(
-          ` A segítséget kérte: ${message.author.tag}`,
-          message.author.displayAvatarURL({ dynamic: true })
-        )
-        .setTimestamp()
-        .setColor("YELLOW");
-      return message.channel.send(embed);
-    } else {
-      const command =
-        bot.commands.get(args[0].toLowerCase()) ||
-        bot.commands.find(
-          (c) => c.aliases && c.aliases.includes(args[0].toLowerCase())
-        );
+              //this is how it will be created as
+              cats = {
+                  name: name,
+                  value: `-`,
+                  inline: true
+              }
 
-      if (!command) {
-        const embed = new MessageEmbed()
-          .setTitle(`<:x_:892448949925969990> Helytelen használat! Használd: \`${prefix}help\` az összes parancsomhoz!`)
-          .setColor("YELLOW");
-        return message.channel.send(embed);
+
+              categories.push(cats);
+              ccate.push(nome);
+          });
+          //embed
+          const embed = new MessageEmbed()
+              .setTitle(`<:loogoo:982724915616698408> ${botname} Parancsok.`)
+              .setThumbnail(bot.user.displayAvatarURL())
+              .setDescription(`>>> **A prefixem:** \`${prefix}\` \n**Fejlesztések:** \n**<:BadgeDiscordEmployee:980361494069911583> - v12 updated to v13**`)
+              .addFields(categories)
+              .setImage("https://cdn.discordapp.com/attachments/889161008998907905/982301542419931216/anibanner.png")
+              .setFooter(
+                  `Ő kérte le: ${message.author.tag}`,
+                  message.author.displayAvatarURL({
+                      dynamic: true
+                  })
+              )
+              .setTimestamp()
+              .setColor("BLUE")
+
+
+//creating the dropdown menu
+          let menus = create_mh(ccate);
+          return message.reply({
+              embeds: [embed],
+              components: menus.smenu
+          }).then((msgg) => {
+
+              const menuID = menus.sid;
+
+              const select = async (interaction) => {
+                  if (interaction.customId != menuID) return;
+
+                  let {
+                      values
+                  } = interaction;
+
+                  let value = values[0];
+
+                  let catts = [];
+
+                  readdirSync("./ownercommands/").forEach((dir) => {
+                      if (dir.toLowerCase() !== value.toLowerCase()) return;
+                      const commands = readdirSync(`./ownercommands/${dir}/`).filter((file) =>
+                          file.endsWith(".js")
+                      );
+
+
+                      const cmds = commands.map((command) => {
+                          let file = require(`../../ownercommands/${dir}/${command}`); //getting the commands again
+
+                          if (!file.name) return "Nincs parancs";
+
+                          let name = file.name.replace(".js", "");
+
+                          if (bot.commands.get(name).hidden) return;
+
+
+                          let des = bot.commands.get(name).description;
+                          let emo = bot.commands.get(name).emoji;
+                          let emoe = emo ? `${emo} - ` : ``;
+
+                          let obj = {
+                              cname: `${emoe}\`${name}\``,
+                              des
+                          }
+
+                          return obj;
+                      });
+
+                      let dota = new Object();
+
+                      cmds.map(co => {
+                          if (co == undefined) return;
+
+                          dota = {
+                              name: `Parancs: ${cmds.length === 0 ? "In progress." : co.cname}`,
+                              value: co.des ? co.des : `*Nincs leírás.*`,
+                              inline: true,
+                          }
+                          catts.push(dota)
+                      });
+
+                      cots.push(dir.toLowerCase());
+                  });
+
+                  if (cots.includes(value.toLowerCase())) {
+                      const combed = new MessageEmbed()
+                          .setTitle(`__${value.charAt(0).toUpperCase() + value.slice(1)} Parancsok!__`)
+                          .setThumbnail(bot.user.displayAvatarURL())
+                          .setDescription(`>>> Használd a  \`${prefix}help\` <parancs neve>, parancsot. Ha több információ érdekel.\n\n`)
+                          .addFields(catts)
+                          .setColor("BLUE")
+                          .setImage("https://cdn.discordapp.com/attachments/889161008998907905/982301542419931216/anibanner.png")
+
+                      await interaction.deferUpdate();
+
+                      return interaction.message.edit({
+                          embeds: [combed],
+                          components: menus.smenu
+                      })
+                  };
+
+              };
+
+              const filter = (interaction) => {
+                  return !interaction.user.bot && interaction.user.id == message.author.id
+              };
+
+              const collector = msgg.createMessageComponentCollector({
+                  filter,
+                  componentType: "SELECT_MENU"
+              });
+              collector.on("collect", select);
+              collector.on("end", () => null);
+
+          });
+
+      } else {
+          let catts = [];
+
+          readdirSync("./ownercommands/").forEach((dir) => {
+              if (dir.toLowerCase() !== args[0].toLowerCase()) return;
+              const commands = readdirSync(`./ownercommands/${dir}/`).filter((file) =>
+                  file.endsWith(".js")
+              );
+
+
+              const cmds = commands.map((command) => {
+                  let file = require(`../../ownercommands/${dir}/${command}`);
+
+                  if (!file.name) return "Nincs parancs.";
+
+                  let name = file.name.replace(".js", "");
+
+                  if (client.commands.get(name).hidden) return;
+
+
+                  let des = client.commands.get(name).description;
+                  let emo = client.commands.get(name).emoji;
+                  let emoe = emo ? `${emo} - ` : ``;
+
+                  let obj = {
+                      cname: `${emoe}\`${name}\``,
+                      des
+                  }
+
+                  return obj;
+              });
+
+              let dota = new Object();
+
+              cmds.map(co => {
+                  if (co == undefined) return;
+
+                  dota = {
+                      name: `${cmds.length === 0 ? "In progress." : prefix + co.cname}`,
+                      value: co.des ? co.des : `Nincs leírás.`,
+                      inline: true,
+                  }
+                  catts.push(dota)
+              });
+
+              cots.push(dir.toLowerCase());
+          });
+
+          const command =
+              bot.commands.get(args[0].toLowerCase()) ||
+              bot.commands.find(
+                  (c) => c.aliases && c.aliases.includes(args[0].toLowerCase())
+              );
+
+          if (cots.includes(args[0].toLowerCase())) {
+              const combed = new MessageEmbed()
+                  .setTitle(`__${args[0].charAt(0).toUpperCase() + args[0].slice(1)} Commands!__`)
+                  .setDescription(`Use \`${prefix}help\` followed by a command name to get more information on a command.\nFor example: \`${prefix}help ping\`.\n\n`)
+                  .addFields(catts)
+                  .setColor("YELLOW")
+                  .setImage("https://cdn.discordapp.com/attachments/889161008998907905/982301542419931216/anibanner.png")
+
+              return message.reply({
+                  embeds: [combed]
+              })
+          };
+
+          if (!command) {
+              const embed = new MessageEmbed()
+                  .setTitle(`Helytelen parancs! Használat: \`${prefix}help\` és megmutatja az összes parancsot!`)
+                  .setColor("BLUE");
+              return await message.reply({
+                  embeds: [embed],
+                  allowedMentions: {
+                      repliedUser: false
+                  },
+              });
+          }
+
+          const embed = new MessageEmbed() //this is for commmand help eg. !!help ping
+              .setTitle("Parancs leírása")
+              .setThumbnail(bot.user.displayAvatarURL())
+              .addField(
+                  "Parancs:",
+                  command.name ? `\`${command.name}\`` : "Nincs parancs."
+              )
+              .addField(
+                  "Használat:",
+                  command.usage ?
+                  `\`${prefix}${command.name} ${command.usage}\`` :
+                  `\`${prefix}${command.name}\``
+              )
+              .addField(
+                  "Parancs leírás:",
+                  command.description ?
+                  command.description :
+                  "Nincs leírás."
+              )
+              .setFooter(
+                  `Ő kérte le: ${message.author.tag}`,
+                  message.author.displayAvatarURL({
+                      dynamic: true
+                  })
+              )
+              .setTimestamp()
+              .setColor("BLUE");
+          return await message.reply({
+              embeds: [embed]
+          });
       }
-
-      const embed = new MessageEmbed()
-        .setThumbnail(bot.user.displayAvatarURL())
-        .setTitle("<:info:892887909559066677> Parancs részletek:")
-        .addField("Prefix:", `\`${prefix}\``)
-        .addField(
-          "Parancs:",
-          command.name ? `\`${command.name}\`` : "Nincs neve ennek a parancsnak."
-        )
-        .addField(
-          "Hasznlálat:",
-          command.usage
-            ? `\`${prefix}${command.name} ${command.usage}\``
-            : `\`${prefix}${command.name}\``
-        )
-        .addField(
-          "Leírás:",
-          command.description
-            ? command.description
-            : "Nincs leírása ennek a parancsnak."
-        )
-        .setFooter(
-          `Ő kérte le: ${message.author.tag}`,
-          message.author.displayAvatarURL({ dynamic: true })
-        )
-        .setTimestamp()
-        .setColor(roleColor);
-      return message.channel.send(embed);
-    }
   }else {
     return message.channel.send("**Csak a __Tulajdonos__ használhatja ezt a parancsot.**");
   }
 }
-};
+}
