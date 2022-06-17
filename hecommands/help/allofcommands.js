@@ -62,7 +62,7 @@ module.exports = {
         )
         .setTimestamp()
         .setColor("YELLOW");
-      return message.channel.send(embed);
+      return message.channel.send({ embeds: [embed] });
     } else {
       const command =
         bot.commands.get(args[0].toLowerCase()) ||
@@ -74,7 +74,7 @@ module.exports = {
         const embed = new MessageEmbed()
           .setTitle(`<:x_:892448949925969990> Helytelen használat! Használd: \`${prefix}help\` az összes parancsomhoz!`)
           .setColor("YELLOW");
-        return message.channel.send(embed);
+        return message.channel.send({ embeds: [embed] });
       }
 
       const embed = new MessageEmbed()
@@ -103,7 +103,7 @@ module.exports = {
         )
         .setTimestamp()
         .setColor(roleColor);
-      return message.channel.send(embed);
+      return message.channel.send({ embeds: [embed] });
     }
   }else {
     return message.channel.send("**Csak a __Hiba Elhárító__ használhatja ezt a parancsot.**");
