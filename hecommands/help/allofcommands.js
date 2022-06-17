@@ -17,7 +17,7 @@ const HE = ["525015162491502611"];
 const create_mh = require(`../../functions/menu.js`); // this one gets the dropdown menu
 
 module.exports = {
-  name: "help",
+  name: "hcmd",
   emoji: `📌`, // emoji next to the command name i will show you in a min
   description: "Megmutatja az összes parancsot.",
   /**
