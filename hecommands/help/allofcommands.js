@@ -23,13 +23,13 @@ module.exports = {
     if (!args[0]) {
       let categories = [];
 
-      readdirSync("./ownercommands/").forEach((dir) => {
-        const commands = readdirSync(`./ownercommands/${dir}/`,).filter((file) =>
+      readdirSync("./hecommands/").forEach((dir) => {
+        const commands = readdirSync(`./hecommands/${dir}/`,).filter((file) =>
           file.endsWith(".js")
         );
 
         const cmds = commands.map((command) => {
-          let file = require(`../../ownercommands/${dir}/${command}`);
+          let file = require(`../../hecommands/${dir}/${command}`);
 
           if (!file.name) return "Nincs parancs név.";
 
@@ -62,7 +62,7 @@ module.exports = {
         )
         .setTimestamp()
         .setColor("YELLOW");
-      return message.channel.send({ embeds: [embed] });
+      return message.channel.send(embed);
     } else {
       const command =
         bot.commands.get(args[0].toLowerCase()) ||
@@ -74,7 +74,7 @@ module.exports = {
         const embed = new MessageEmbed()
           .setTitle(`<:x_:892448949925969990> Helytelen használat! Használd: \`${prefix}help\` az összes parancsomhoz!`)
           .setColor("YELLOW");
-        return message.channel.send({ embeds: [embed] });
+        return message.channel.send(embed);
       }
 
       const embed = new MessageEmbed()
@@ -103,7 +103,7 @@ module.exports = {
         )
         .setTimestamp()
         .setColor(roleColor);
-      return message.channel.send({ embeds: [embed] });
+      return message.channel.send(embed);
     }
   }else {
     return message.channel.send("**Csak a __Hiba Elhárító__ használhatja ezt a parancsot.**");
