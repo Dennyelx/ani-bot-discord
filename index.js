@@ -103,7 +103,8 @@ bot.on("ready", async() => {
     let statuszok = [
         `📌| Prefix : !`,
         `💻| Fejlesztő: Dennyel#1085`,
-		`😏| Hali. Nekem ${bot.users.cache.size} barátom van.`
+		`😏| Hali. Nekem ${bot.users.cache.size} barátom van.`,
+	    `🌊| Itt a nyár. Mindenki használja ki.`
     ]
 
     setInterval(function(){
