@@ -101,7 +101,7 @@ bot.on("ready", async() => {
     console.log(`${bot.user.username} Elindult.!`)
 
     let statuszok = [
-        `📌| Prefix : !`,
+        `📌| Prefix : //`,
         `💻| Fejlesztő: Dennyel#1085`,
 		`😏| Hali. Nekem ${bot.users.cache.size} barátom van.`,
 	    `🌊| Itt a nyár. Mindenki használja ki.`
