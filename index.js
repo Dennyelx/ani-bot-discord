@@ -131,6 +131,28 @@ bot.on("ready", async() => {
 
 
 
+player.on('trackStart', (queue, track) => {
+  if (!bot.config.opt.loopMessage && queue.repeatMode !== 0) return;
+  queue.metadata.send({ content: `🎵 A zene elindítva: **${track.title}** -> Csatorna: **${queue.connection.channel.name}**` });
+});
+
+player.on('trackAdd', (queue, track) => {
+  queue.metadata.send({ content: `**${track.title}** hozzáadva a lejátszási listához. ✅` });
+});
+
+player.on('botDisconnect', (queue) => {
+  queue.metadata.send({ content: 'Valaki az audio csatornáról, amelyhez csatlakoztam, kirúgott, az egész lejátszási lista törlődött! ❌' });
+});
+
+player.on('channelEmpty', (queue) => {
+  queue.metadata.send({ content: 'Azért hagytam el az audiocsatornát, mert nincs senki az hang csatornámon. ❌' });
+});
+
+player.on('queueEnd', (queue) => {
+  queue.metadata.send({ content: 'Az összes lejátszási sor befejeződött, azt hiszem, hallgathatnánk még néhány zenét. ✅' });
+});
+
+
 
 
 
