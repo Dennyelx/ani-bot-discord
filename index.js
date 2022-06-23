@@ -206,7 +206,7 @@ bot.on('guildMemberAdd', member =>{
     const channel = member.guild.channels.cache.find(channel => channel.name === "welcome"); //You can change welcome to any text channel you want, "general", "new-doods", ect.
     if(!channel) return;
 
-    channel.send(`<:joins:982724911103623239> **Szia ${member}, Köszi hogy csatlakozztál!**`)
+    channel.send(`<:joins:982724911103623239> **Szia ${member}, Köszi hogy csatlakoztál!**`)
 });
 
 //////////////////////
