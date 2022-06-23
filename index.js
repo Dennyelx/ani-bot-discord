@@ -23,7 +23,19 @@ bot.aliases = new Discord.Collection();
 
 ///////////////////////// MUSIC /////////////////////////
 
+const { Player } = require('discord-player');
+const { readdirSync } = require('fs');
+bot.config = require('./config');
+bot.player = new Player(bot, bot.config.opt.discordPlayer);
+const player = bot.player
 
+const events = readdirSync('./events/').filter(file => file.endsWith('.js'));
+for (const file of events) {
+    const event = require(`./events/${file}`);
+    console.log(`-> Loaded event ${file.split('.')[0]}`);
+    bot.on(file.split('.')[0], event.bind(null, bot));
+    delete require.cache[require.resolve(`./events/${file}`)];
+};
 
 ///////////////////////// MUSIC /////////////////////////
 
