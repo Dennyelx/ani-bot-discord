@@ -17,7 +17,7 @@ opt: {
         }
     }, 
 
-    maxVol: 100, //You can specify the maximum volume level.
+    maxVol: 300, //You can specify the maximum volume level.
     loopMessage: false,
 
     discordPlayer: {
